@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { IncomingMessage as NodeIncomingMessage } from "node:http";
 
 /**
  * EcoChat server-side chat endpoint.
@@ -53,6 +54,34 @@ function isValidMessage(m: unknown): m is IncomingMessage {
   );
 }
 
+/**
+ * Disable Vercel's built-in body parsing so `readJsonBody` below always reads
+ * directly from the request stream. This removes any ambiguity about whether
+ * `req.body` was already parsed, partially parsed, or left as a raw string.
+ */
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+/**
+ * Reads and parses the JSON request body directly from the request stream.
+ * With `bodyParser: false` above, Vercel never touches the body itself, so
+ * this always sees the raw bytes and behaves identically in local dev
+ * (`vercel dev`) and in production, regardless of routing/proxy quirks.
+ */
+async function readJsonBody(req: VercelRequest): Promise<unknown> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req as unknown as NodeIncomingMessage) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  const raw = Buffer.concat(chunks).toString("utf8").trim();
+
+  if (!raw) return {};
+  return JSON.parse(raw);
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS / method guard - this is a same-origin app, so only POST is supported.
   res.setHeader("Access-Control-Allow-Origin", "same-origin");
@@ -69,7 +98,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "The server is not configured correctly. Please try again later." });
   }
 
-  const body = req.body as { messages?: unknown } | undefined;
+  let body: { messages?: unknown } | undefined;
+  try {
+    body = (await readJsonBody(req)) as { messages?: unknown };
+  } catch {
+    return res.status(400).json({ error: "Request body must be valid JSON." });
+  }
 
   if (!body || !Array.isArray(body.messages)) {
     return res.status(400).json({ error: "Request must include a 'messages' array." });
