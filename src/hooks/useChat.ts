@@ -34,12 +34,13 @@ export function useChat() {
       requestInFlight.current = true;
       setIsLoading(true);
 
-      // Build the outgoing history synchronously so we don't depend on stale state.
-      let outgoingHistory: ChatMessage[] = [];
-      setMessages((prev) => {
-        outgoingHistory = [...prev, userMessage];
-        return outgoingHistory;
-      });
+      // Compute the outgoing history directly from current state. We avoid
+      // relying on a setState updater's side effect here, since React does
+      // not guarantee that updater callback runs synchronously before the
+      // next line executes - that previously caused outgoingHistory to be
+      // read while still empty, sending `{ messages: [] }` to the server.
+      const outgoingHistory = [...messages, userMessage];
+      setMessages(outgoingHistory);
 
       try {
         const reply = await sendChatMessage(outgoingHistory);
@@ -71,7 +72,7 @@ export function useChat() {
         requestInFlight.current = false;
       }
     },
-    []
+    [messages]
   );
 
   const resetConversation = useCallback(() => {

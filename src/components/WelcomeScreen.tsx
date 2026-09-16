@@ -1,4 +1,5 @@
 import { Leaf, Recycle, Sun, Droplets, Sprout } from "lucide-react";
+import React from "react";
 
 interface SuggestedPrompt {
   label: string;

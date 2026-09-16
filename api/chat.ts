@@ -8,7 +8,7 @@ import type { IncomingMessage as NodeIncomingMessage } from "node:http";
  * The Gemini API key lives only in the Vercel environment and is never sent to the client.
  */
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-3.1-flash-lite";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const MAX_MESSAGES = 40;
@@ -110,6 +110,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (body.messages.length === 0) {
+    console.log("was here: ", body)
     return res.status(400).json({ error: "Conversation cannot be empty." });
   }
 

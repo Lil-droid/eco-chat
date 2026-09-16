@@ -9,6 +9,7 @@ import { ErrorBanner } from "../components/ErrorBanner";
 
 export function ChatPage() {
   const { messages, isLoading, error, sendMessage, resetConversation } = useChat();
+  console.log(messages)
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
   const [dismissedError, setDismissedError] = useState<string | null>(null);
 
