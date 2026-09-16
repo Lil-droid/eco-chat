@@ -8,7 +8,8 @@ import type { IncomingMessage as NodeIncomingMessage } from "node:http";
  * The Gemini API key lives only in the Vercel environment and is never sent to the client.
  */
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+
+const GEMINI_MODEL = "gemini-flash-latest";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const MAX_MESSAGES = 40;
