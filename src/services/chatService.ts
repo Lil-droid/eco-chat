@@ -12,6 +12,8 @@ export async function sendChatMessage(history: ChatMessage[]): Promise<string> {
     messages: history.map(({ role, content }) => ({ role, content })),
   };
 
+  console.log("log: ", payload)
+
   let response: Response;
   try {
     response = await fetch("/api/chat", {
