@@ -110,6 +110,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (body.messages.length === 0) {
+    console.log("was here: ", body)
     return res.status(400).json({ error: "Conversation cannot be empty." });
   }
 

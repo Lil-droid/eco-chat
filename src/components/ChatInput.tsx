@@ -16,6 +16,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
 
   const handleSend = () => {
     if (!canSend) return;
+    console.log(value)
     onSend(value);
     setValue("");
     if (textareaRef.current) {
